@@ -10,3 +10,37 @@ Homestead.json
 Homestead.yaml
 npm-debug.log
 yarn-error.log
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.local
+
+# front end
+frontend/.DS_Store
+frontend/node_modules/
+frontend/dist/
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/**/*.log
+
+frontend/tests/**/coverage/
+frontend/tests/e2e/reports
+frontend/selenium-debug.log
+
+# Editor directories and files
+frontend/.idea
+frontend/.vscode
+frontend/*.suo
+frontend/*.ntvs*
+frontend/*.njsproj
+frontend/*.sln
+frontend/*.local
+
+frontend/package-lock.json
+frontend/yarn.lock
