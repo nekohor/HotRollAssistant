@@ -108,14 +108,14 @@ npm install --registry=https://registry.npm.taobao.org
 
 ### 前端改造
 
-删除mix前端脚手架
+删除后端文件夹中的mix前端脚手架
 
 ```bash
 # remove existing frontend scaffold
 rm -rf package.json webpack.mix.js yarn.lock resources/assets
 ```
 
-修改或创建vue.config.js
+在frontend中修改或创建vue.config.js
 
 ```js
 module.exports = {
@@ -136,13 +136,14 @@ module.exports = {
 }
 ```
 
-修改编译命令
+修改编译命令，增加前缀`rm -rf ../public/{js,css,img} && `
 
 ```json
 "scripts": {
   "serve": "vue-cli-service serve",
 - "build": "vue-cli-service build",
 + "build": "rm -rf ../public/{js,css,img} && vue-cli-service build --no-clean",
++ "build:stage": "rm -rf ../public/{js,css,img} && vue-cli-service build --mode staging",
   "lint": "vue-cli-service lint"
 },
 ```
@@ -181,9 +182,13 @@ class SpaController extends Controller
 
 ## 后端安装相关插件
 
+后端相关的模型、权限、资源等周边的自定义代码文件全部放在`App\Backend`下面。
+
+在`App\Backend\Models`下自定义User模型，以代替框架原来的模型 App\User。
+
 ### 权限
 
-使用spatie/laravel-permission
+使用spatie/laravel-permission，安装：
 
 ```bash
 composer require spatie/laravel-permission
@@ -195,15 +200,38 @@ You should publish [the migration](https://github.com/spatie/laravel-permission/
 php artisan vendor:publish --provider="Spatie\Permission\PermissionServiceProvider"
 ```
 
-After the config and migration have been published and configured,  you can create the role- and permission-tables by running the  migrations:
+Create `UsersTableSeeder` seeder and add seed data into it. When adding seed data, you can use custom helper class eg. `class URP`.
+```bash
+php artisan make:seeder UsersTableSeeder
+```
 
+And add followings into `DatabaseSeeder::run()`.
+```php
+$this->call(UsersTableSeeder::class);
+```
+
+If you want to regard `name` as a unique index, modify the migration of `User`.
+```php
+// $table->string('name');
+// $table->string('email')->unique();
+$table->string('name')->unique();
+$table->string('email');
+```
+
+After the config and migration have been published and configured,  you can create the role- and permission-tables by running the  migrations:
 ```bash
 php artisan migrate
-# or
+# or with seed data
 php artisan migrate --seed
 ```
 
-First, add the `Spatie\Permission\Traits\HasRoles` trait to your `User` model(s):
+> 注意：对控制器的修改可以放在数据库迁移之后进行。
+
+使用`spatie/laravel-permission`
+
+Create three controllers: `UserController`, `RoleController`, `PermissionController` in`App\Backend\Models`
+
+First, add the `Spatie\Permission\Traits\HasRoles` trait to your `User` model:
 
 ```php
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -215,6 +243,24 @@ class User extends Authenticatable
 
     // ...
 }
+```
+
+Create three controllers: `UserController`, `RoleController`, `PermissionController` in `App\Backend\Controllers`
+```bash
+php artisan make:controller UserController
+php artisan make:controller RoleController
+php artisan make:controller PermissionController
+
+# move the three controllers to `App\Backend\Controllers`
+```
+
+And Create three resources `UserResource`, `RoleResource`, `PermissionResource`  in `App\Backend\Resources`
+```bash
+php artisan make:resource UserResource
+php artisan make:resource RoleResource
+php artisan make:resource PermissionResource
+
+# move the three resources to `App\Backend\Resources`
 ```
 
 ### JWT认证
@@ -241,65 +287,135 @@ Generate secret key
 php artisan jwt:secret
 ```
 
-修改 config/auth.php，将 `api guard` 的 `driver` 改为 `jwt`。
-
-```
+修改 config/auth.php，如下所示。
+```php
+// guard to api
 'defaults' => [
     'guard' => 'api',
     'passwords' => 'users',
 ],
 
-...
-
+// driver to jwt
 'guards' => [
     'api' => [
         'driver' => 'jwt',
         'provider' => 'users',
     ],
 ],
+
+// custom model with auth
+'providers' => [
+    'users' => [
+        'driver' => 'eloquent',
+        'model' => App\HotRoll\Models\User::class,
+    ],
+
+    // 'users' => [
+    //     'driver' => 'database',
+    //     'table' => 'users',
+    // ],
+],
+
 ```
 
-user 模型需要继承 `Tymon\JWTAuth\Contracts\JWTSubject` 接口，并实现接口的两个方法 `getJWTIdentifier()` 和 `getJWTCustomClaims()`。
-
-*app\Models\User.php*
-
+user 模型需要继承 `Tymon\JWTAuth\Contracts\JWTSubject` 接口，并实现接口的两个方法 `getJWTIdentifier()` 和 `getJWTCustomClaims()`。这里自建User模型。
 ```php
 <?php
 
-namespace App\Models;
+namespace App\HotRoll\Models;
 
-use Auth;
-use Spatie\Permission\Traits\HasRoles;
-use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
-use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
+use Spatie\Permission\Traits\HasRoles;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable implements MustVerifyEmailContract, JWTSubject
+/**
+ * Class User
+ *
+ * @property string $name
+ * @property string $email
+ * @property string $password
+ * @property Role[] $roles
+ *
+ * @method static User create(array $user)
+ * @package App
+ */
+class User extends Authenticatable implements JWTSubject
+{
+    use Notifiable, HasRoles;
 
-.
-.
-.
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'name', 'email', 'password'
+    ];
+
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [
+        'password', 'remember_token',
+    ];
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
+
+    /**
+     * Set permissions guard to API by default
+     * @var string
+     */
+    protected $guard_name = 'api';
+
+    /**
+     * @inheritdoc
+     */
     public function getJWTIdentifier()
     {
         return $this->getKey();
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getJWTCustomClaims()
     {
         return [];
     }
+
+    /**
+     * @return bool
+     */
+    public function isAdmin(): bool
+    {
+        foreach ($this->roles  as $role) {
+            if ($role->isAdmin()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
 ```
 
-新增api路由
+新增auth相关的api路由
 
 ```
 Route::group([
 
     'middleware' => 'api',
-    'prefix' => 'auth'
+    'prefix' => 'user'
 
 ], function ($router) {
 
@@ -312,104 +428,11 @@ Route::group([
 ```
 
 Then create the `AuthController`, either manually or by running the artisan command:
-
 ```
 php artisan make:controller AuthController
 ```
 
-Then add the following:
-
-```
-<?php
-
-namespace App\Http\Controllers;
-
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use Tymon\JWTAuth\Facades\JWTAuth;
-
-class AuthController extends Controller
-{
-    /**
-     * Create a new AuthController instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->middleware('auth:api', ['except' => ['login']]);
-    }
-
-    /**
-     * Get a JWT via given credentials.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function login(Request $request)
-    {
-        $credentials = [];
-        $credentials['name'] = $request->input('username');
-        $credentials['password'] = $request->input('password');
-
-        if (! $token = JWTAuth::attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-
-        return $this->respondWithToken($token);
-    }
-
-    /**
-     * Get the authenticated User.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function me()
-    {
-        return response()->json(JWTAuth::user());
-    }
-
-    /**
-     * Log the user out (Invalidate the token).
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function logout()
-    {
-        JWTAuth::logout();
-
-        return response()->json(['message' => 'Successfully logged out']);
-    }
-
-    /**
-     * Refresh a token.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function refresh()
-    {
-        return $this->respondWithToken(JWTAuth::refresh());
-    }
-
-    /**
-     * Get the token array structure.
-     *
-     * @param  string $token
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    protected function respondWithToken($token)
-    {
-        return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => JWTAuth::factory()->getTTL() * 60
-        ]);
-    }
-}
-```
-
-处理jwt-auth报错 Method Illuminate\Auth\SessionGuard::factory does not exist
+> 处理jwt-auth报错 Method Illuminate\Auth\SessionGuard::factory does not exist
 
 解决方案:
 
@@ -417,6 +440,11 @@ class AuthController extends Controller
 
 ```
 $this->middleware('auth:api', ['except' => ['login']]);
+```
+
+若使用guard函数，则需在控制器中建立方法guard
+```
+
 ```
 
 现在在postman中测试可用，注意数据库中users表必须有数据。

@@ -1,87 +1,60 @@
 <?php
-
+/**
+ * File AuthController.php
+ *
+ * @author Tuan Duong <bacduong@gmail.com>
+ * @package Laravue
+ * @version 1.0
+ */
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Auth;
+use App\HotRoll\Http\JsonResponse;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Resources\UserResource;
 
+/**
+ * Class AuthController
+ *
+ * @package App\Http\Controllers
+ */
 class AuthController extends Controller
 {
     /**
-     * Create a new AuthController instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->middleware('auth:api', ['except' => ['login']]);
-    }
-
-    /**
-     * Get a JWT via given credentials.
-     *
+     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function login(Request $request)
     {
+        // $credentials = $request->only('email', 'password');
         $credentials = [];
         $credentials['name'] = $request->input('username');
         $credentials['password'] = $request->input('password');
-
-        if (! $token = JWTAuth::attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+        
+        if ($token = $this->guard()->attempt($credentials)) {
+            return response()->json(new UserResource(Auth::user()), Response::HTTP_OK)->header('Authorization', $token);
         }
 
-        return $this->respondWithToken($token);
+        return response()->json(new JsonResponse([], 'login_error'), Response::HTTP_UNAUTHORIZED);
     }
 
-    /**
-     * Get the authenticated User.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function me()
-    {
-        return response()->json(JWTAuth::user());
-    }
-
-    /**
-     * Log the user out (Invalidate the token).
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function logout()
     {
-        JWTAuth::logout();
+        $this->guard()->logout();
+        return response()->json((new JsonResponse())->success([]), Response::HTTP_OK);
+    }
 
-        return response()->json(['message' => 'Successfully logged out']);
+    public function user()
+    {
+        return new UserResource(Auth::user());
     }
 
     /**
-     * Refresh a token.
-     *
-     * @return \Illuminate\Http\JsonResponse
+     * @return mixed
      */
-    public function refresh()
+    private function guard()
     {
-        return $this->respondWithToken(JWTAuth::refresh());
-    }
-
-    /**
-     * Get the token array structure.
-     *
-     * @param  string $token
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    protected function respondWithToken($token)
-    {
-        return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => JWTAuth::factory()->getTTL() * 60
-        ]);
+        return Auth::guard();
     }
 }
