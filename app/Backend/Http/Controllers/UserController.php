@@ -1,20 +1,16 @@
 <?php
-/**
- * File UserController.php
- *
- * @author Tuan Duong <bacduong@gmail.com>
- * @package Laravue
- * @version 1.0
- */
 
-namespace App\Http\Controllers;
+namespace App\Backend\Http\Controllers;
 
-use App\Http\Resources\PermissionResource;
-use App\Http\Resources\UserResource;
-use App\Laravue\JsonResponse;
-use App\Laravue\Models\Permission;
-use App\Laravue\Models\Role;
-use App\Laravue\Models\User;
+use App\Backend\Http\Resources\PermissionResource;
+use App\Backend\Http\Resources\UserResource;
+
+use App\Backend\Http\JsonResponse;
+
+use App\Backend\Models\Permission;
+use App\Backend\Models\Role;
+use App\Backend\Models\User;
+
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Support\Arr;

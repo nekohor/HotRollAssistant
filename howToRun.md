@@ -218,7 +218,7 @@ $table->string('name')->unique();
 $table->string('email');
 ```
 
-After the config and migration have been published and configured,  you can create the role- and permission-tables by running the  migrations:
+After the config and migration have been published and configured,  you can create the role- and permission-tables by running the  migrations.
 ```bash
 php artisan migrate
 # or with seed data
@@ -245,22 +245,52 @@ class User extends Authenticatable
 }
 ```
 
-Create three controllers: `UserController`, `RoleController`, `PermissionController` in `App\Backend\Controllers`
-```bash
-php artisan make:controller UserController
-php artisan make:controller RoleController
-php artisan make:controller PermissionController
+自定义`Role`和`Permission`这两个模型，并继承于`\Spatie\Permission\Models\Role`和`\Spatie\Permission\Models\Permission`。
+```php
+class Role extends \Spatie\Permission\Models\Role
+{
+    /**
+     * Check whether current role is admin
+     * @return bool
+     */
+    public function isAdmin(): bool
+    {
+        return $this->name === Urp::ROLE_ADMIN;
+    }
+}
 
-# move the three controllers to `App\Backend\Controllers`
+class Permission extends \Spatie\Permission\Models\Permission
+{
+    /**
+     * To exclude permission management from the list
+     *
+     * @param $query
+     * @return Builder
+     */
+    public function scopeAllowed($query)
+    {
+        return $query->where('name', '!=', Urp::PERMISSION_PERMISSION_MANAGE);
+    }
+}
+
 ```
 
-And Create three resources `UserResource`, `RoleResource`, `PermissionResource`  in `App\Backend\Resources`
+And Create three resources `UserResource`, `RoleResource`, `PermissionResource`  in `App\Backend\Http\Resources`
 ```bash
 php artisan make:resource UserResource
 php artisan make:resource RoleResource
 php artisan make:resource PermissionResource
 
 # move the three resources to `App\Backend\Resources`
+```
+
+Create three controllers: `UserController`, `RoleController`, `PermissionController` in `App\Backend\Http\Controllers`
+```bash
+php artisan make:controller UserController
+php artisan make:controller RoleController
+php artisan make:controller PermissionController
+
+# move the three controllers to `App\Backend\Controllers`
 ```
 
 ### JWT认证
@@ -307,7 +337,7 @@ php artisan jwt:secret
 'providers' => [
     'users' => [
         'driver' => 'eloquent',
-        'model' => App\HotRoll\Models\User::class,
+        'model' => App\Backend\Models\User::class,
     ],
 
     // 'users' => [
@@ -318,11 +348,12 @@ php artisan jwt:secret
 
 ```
 
-user 模型需要继承 `Tymon\JWTAuth\Contracts\JWTSubject` 接口，并实现接口的两个方法 `getJWTIdentifier()` 和 `getJWTCustomClaims()`。这里自建User模型。
+User模型需要继承 `Tymon\JWTAuth\Contracts\JWTSubject` 接口，并实现接口的两个方法 `getJWTIdentifier()` 和 `getJWTCustomClaims()`，并设置`$guard_name = 'api'`
+自建User模型于`App\Backend\Models`。
 ```php
 <?php
 
-namespace App\HotRoll\Models;
+namespace App\Backend\Models;
 
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -409,9 +440,33 @@ class User extends Authenticatable implements JWTSubject
 }
 ```
 
-新增auth相关的api路由
-
+Then create the `AuthController`, either manually or by running the artisan command:
 ```
+php artisan make:controller AuthController
+```
+
+> 处理jwt-auth报错 Method Illuminate\Auth\SessionGuard::factory does not exist
+解决方案:修改验证控制器,将auth()方法替换为 JWTAuth Facades方法,同时在构造方法中指定middleware 和 guard
+```php
+$this->middleware('auth:api', ['except' => ['login']]);
+```
+
+若使用guard函数，则需在AuthController控制器中建立方法guard()
+```php
+/**
+ * @return mixed
+ */
+private function guard()
+{
+    return Auth::guard();
+}
+```
+
+### 路由设置
+
+api路由设置如下：
+
+```php
 Route::group([
 
     'middleware' => 'api',
@@ -425,26 +480,6 @@ Route::group([
     Route::post('me', 'AuthController@me');
 
 });
-```
-
-Then create the `AuthController`, either manually or by running the artisan command:
-```
-php artisan make:controller AuthController
-```
-
-> 处理jwt-auth报错 Method Illuminate\Auth\SessionGuard::factory does not exist
-
-解决方案:
-
-修改验证控制器,将auth()方法替换为 JWTAuth Facades方法,同时在构造方法中指定middleware 和 guard
-
-```
-$this->middleware('auth:api', ['except' => ['login']]);
-```
-
-若使用guard函数，则需在控制器中建立方法guard
-```
-
 ```
 
 现在在postman中测试可用，注意数据库中users表必须有数据。

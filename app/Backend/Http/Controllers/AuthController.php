@@ -6,13 +6,15 @@
  * @package Laravue
  * @version 1.0
  */
-namespace App\Http\Controllers;
+namespace App\Backend\Http\Controllers;
 
-use App\HotRoll\Http\JsonResponse;
+use App\Backend\Http\JsonResponse;
+use App\Backend\Http\Resources\UserResource;
+
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Resources\UserResource;
+
 
 /**
  * Class AuthController

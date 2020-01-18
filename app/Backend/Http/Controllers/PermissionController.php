@@ -1,17 +1,11 @@
 <?php
-/**
- * File PermissionController.php
- *
- * @author Tuan Duong <bacduong@gmail.com>
- * @package Laravue
- * @version 1.0
- */
-namespace App\Http\Controllers;
 
-use App\Http\Resources\PermissionResource;
+namespace App\Backend\Http\Controllers;
+
+use App\Backend\Http\Resources\PermissionResource;
+use App\Backend\Models\Permission;
+
 use Illuminate\Http\Request;
-use App\HotRoll\Models\Permission;
-
 /**
  * Class PermissionController
  *

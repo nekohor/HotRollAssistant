@@ -1,19 +1,13 @@
 <?php
-/**
- * File RoleController.php
- *
- * @author Tuan Duong <bacduong@gmail.com>
- * @package Laravue
- * @version 1.0
- */
-namespace App\Http\Controllers;
 
-use App\Http\Resources\PermissionResource;
-use App\Laravue\Models\Permission;
+namespace App\Backend\Http\Controllers;
+
+use App\Backend\Models\Permission;
+use App\Backend\Models\Role;
+use App\Backend\Http\Resources\PermissionResource;
+use App\Backend\Http\Resources\RoleResource;
+
 use Illuminate\Http\Request;
-use App\Laravue\Models\Role;
-use App\Http\Resources\RoleResource;
-
 /**
  * Class RoleController
  *
