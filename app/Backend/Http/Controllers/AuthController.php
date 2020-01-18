@@ -11,11 +11,11 @@ namespace App\Backend\Http\Controllers;
 use App\Backend\Http\JsonResponse;
 use App\Backend\Http\Resources\UserResource;
 
+use App\Http\Controllers\Controller;
+
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-
-
 /**
  * Class AuthController
  *

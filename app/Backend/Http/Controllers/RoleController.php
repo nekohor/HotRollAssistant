@@ -7,6 +7,8 @@ use App\Backend\Models\Role;
 use App\Backend\Http\Resources\PermissionResource;
 use App\Backend\Http\Resources\RoleResource;
 
+use App\Http\Controllers\Controller;
+
 use Illuminate\Http\Request;
 /**
  * Class RoleController

@@ -5,6 +5,8 @@ namespace App\Backend\Http\Controllers;
 use App\Backend\Http\Resources\PermissionResource;
 use App\Backend\Models\Permission;
 
+use App\Http\Controllers\Controller;
+
 use Illuminate\Http\Request;
 /**
  * Class PermissionController

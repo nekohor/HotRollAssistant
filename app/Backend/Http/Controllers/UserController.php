@@ -11,6 +11,8 @@ use App\Backend\Models\Permission;
 use App\Backend\Models\Role;
 use App\Backend\Models\User;
 
+use App\Http\Controllers\Controller;
+
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Support\Arr;

@@ -462,10 +462,7 @@ private function guard()
 }
 ```
 
-### 路由设置
-
-api路由设置如下：
-
+若构造方法里有auth api中间件的设定，则在routes文件中不用设定，相关路由放在组内同一层次。
 ```php
 Route::group([
 
@@ -479,6 +476,18 @@ Route::group([
     Route::post('refresh', 'AuthController@refresh');
     Route::post('me', 'AuthController@me');
 
+});
+```
+
+或者auth的api路由设置如下：
+
+```php
+Route::group(['middleware' => 'api'], function () {
+    Route::post('auth/login', '\App\Backend\Http\Controllers\AuthController@login');
+    Route::group(['middleware' => 'auth:api'], function () {
+        Route::get('auth/user', '\App\Backend\Http\Controllers\AuthController@user');
+        Route::post('auth/logout', '\App\Backend\Http\Controllers\AuthController@logout');
+    });
 });
 ```
 
