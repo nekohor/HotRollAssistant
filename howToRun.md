@@ -38,7 +38,6 @@ mv vue-element-admin frontend
 ```
 
 add .npmrc用于解决node-sass安装问题
-
 ```
 touch .npmrc
 
@@ -132,7 +131,7 @@ module.exports = {
   // make sure to do this only in production.
   indexPath: process.env.NODE_ENV === 'production'
     ? '../resources/views/index.blade.php'
-    : 'index.html'
+    : 'index.html',
 }
 ```
 
@@ -142,7 +141,7 @@ module.exports = {
 "scripts": {
   "serve": "vue-cli-service serve",
 - "build": "vue-cli-service build",
-+ "build": "rm -rf ../public/{js,css,img} && vue-cli-service build --no-clean",
++ "build:prod": "rm -rf ../public/{js,css,img} && vue-cli-service build --no-clean",
 + "build:stage": "rm -rf ../public/{js,css,img} && vue-cli-service build --mode staging",
   "lint": "vue-cli-service lint"
 },
@@ -160,7 +159,7 @@ module.exports = {
 Route::get('/{any}', 'SpaController@index')->where('any', '.*');
 ```
 
-新增控制器
+新增单页面控制器
 
 **app/Http/Controllers/SpaController.php**
 
@@ -492,3 +491,53 @@ Route::group(['middleware' => 'api'], function () {
 ```
 
 现在在postman中测试可用，注意数据库中users表必须有数据。
+
+
+## 前端适配工作
+
+### devServer
+在frontend中vue.config.js修改`devServer`
+```js
+module.exports = {
+  // proxy API requests to Valet during development
+  devServer: {
+    proxy: 'http://localhost'
+  },
+}
+```
+
+### 相关接口文件修改
+在src/api中新增相关js文件, 若使用vue-element-admin集成方案，src/api中必须包含qiniu和remote-search
+在src/store中新增相关js文件
+
+src/utils中替换request.js, 其中使用Bearer的token验证方式。
+```js
+// Request intercepter
+service.interceptors.request.use(
+  config => {
+    const token = getToken()
+    if (token) {
+      config.headers['Authorization'] = 'Bearer ' + getToken() // Set JWT token
+    }
+
+    return config
+  },
+  error => {
+    // Do something with request error
+    console.log(error) // for debug
+    Promise.reject(error)
+  }
+)
+```
+
+
+在main.js中去除mockXHR
+```js
+// if (process.env.NODE_ENV === 'production') {
+//   const { mockXHR } = require('../mock')
+//   mockXHR()
+// }
+```
+
+
+
