@@ -62,7 +62,8 @@ export default {
     clipboardDemo: 'Clipboard',
     i18n: 'I18n',
     externalLink: 'External Link',
-    profile: 'Profile'
+    profile: 'Profile',
+    ShiftOutputPrediction: 'Shift Output Prediction'
   },
   navbar: {
     dashboard: 'Dashboard',

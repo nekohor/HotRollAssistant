@@ -24,3 +24,19 @@ Route::group(['middleware' => 'api'], function () {
         Route::post('auth/logout', '\App\Backend\Http\Controllers\AuthController@logout');
     });
 });
+
+
+Route::get(
+    'rules/import', 
+    '\App\HotRoll\Http\Controllers\RulesImportController@importRules'
+);
+
+Route::post(
+    'outputs/shift', 
+    '\App\HotRoll\Http\Controllers\ProductionOutputController@calculateShiftOutput'
+);
+
+Route::get(
+    'outputs/shift', 
+    '\App\HotRoll\Http\Controllers\ProductionOutputController@calculateShiftOutput'
+);

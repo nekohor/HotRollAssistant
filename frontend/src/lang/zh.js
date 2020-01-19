@@ -62,7 +62,8 @@ export default {
     clipboardDemo: 'Clipboard',
     i18n: '国际化',
     externalLink: '外链',
-    profile: '个人中心'
+    profile: '个人中心',
+    ShiftOutputPrediction: '班组产量预测'
   },
   navbar: {
     dashboard: '首页',

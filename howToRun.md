@@ -702,6 +702,15 @@ store.dispatch('permission/generateRoutes', { roles, permissions }).then(respons
 
 在env配置和config/database配置中新增db_data的数据库配置, 也可使用默认数据库。
 
+使用maatwebsite/excel处理excel文件的import工作
+```bash
+composer require maatwebsite/excel
+```
+
+publish the config
+```bash
+php artisan vendor:publish --provider="Maatwebsite\Excel\ExcelServiceProvider"
+```
 
 
 
@@ -723,6 +732,7 @@ App\HotRoll\Providers\OracleDatabaseProvider::class,
 实现自己的Facades  如：DBMES  DBQMS等
 Add alias in app/config/app.php
 ```php
-'DBMES' => repat\LaravelMedoo\MedooFacade::class,
-'DBQMS' => repat\LaravelMedoo\MedooFacade::class,
+// oracle database facades
+'QmsDB' => App\HotRoll\Facades\QmsDatabaseFacade::class,
+'MesDB' => App\HotRoll\Facades\MesDatabaseFacade::class,
 ```
