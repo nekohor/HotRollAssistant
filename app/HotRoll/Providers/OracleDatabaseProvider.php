@@ -22,15 +22,15 @@ class OracleDatabaseProvider extends ServiceProvider
 
     protected function registerHelper()
     {
-        $this->app->singleton('dbqms', function ($app) {
+        $this->app->singleton('mesdb', function ($app) {
 
-            $dbConnection = "database.connections.qms.";
+            $dbConnection = "database.connections.mes.";
             return $this->getMedooInstance($dbConnection);
         });
 
-        $this->app->singleton('dbmes', function ($app) {
+        $this->app->singleton('qmsdb', function ($app) {
 
-            $dbConnection = "database.connections.mes.";
+            $dbConnection = "database.connections.qms.";
             return $this->getMedooInstance($dbConnection);
         });
     }
@@ -83,6 +83,6 @@ class OracleDatabaseProvider extends ServiceProvider
      */
     public function provides()
     {
-        return ['dbqms', 'dbmes'];
+        return ['mesdb', 'qmsdb'];
     }
 }

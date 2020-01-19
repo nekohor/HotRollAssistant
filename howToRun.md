@@ -717,7 +717,7 @@ composer require repat/laravel-medoo
 实现自己的ServiceProvider
 Add the Service Provider to the providers array in app/config/app.php
 ```php
-repat\LaravelMedoo\MedooServiceProvider::class,
+App\HotRoll\Providers\OracleDatabaseProvider::class,
 ```
 
 实现自己的Facades  如：DBMES  DBQMS等

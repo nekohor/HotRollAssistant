@@ -3,7 +3,7 @@ namespace App\HotRoll\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
-class DBMesFacade extends Facade
+class MesDatabaseFacade extends Facade
 {
     /**
      * Get the registered name of the component.
@@ -12,6 +12,6 @@ class DBMesFacade extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return 'dbmes';
+        return 'mesdb';
     }
 }

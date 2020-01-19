@@ -230,8 +230,9 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
 
-        'DBQMS' => App\HotRoll\Facades\DBQmsFacade::class,
-        'DBMES' => App\HotRoll\Facades\DBMesFacade::class,
+        // oracle database facades
+        'QmsDB' => App\HotRoll\Facades\QmsDatabaseFacade::class,
+        'MesDB' => App\HotRoll\Facades\MesDatabaseFacade::class,
 
     ],
 

@@ -3,7 +3,7 @@ namespace App\HotRoll\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
-class DBQmsFacade extends Facade
+class QmsDatabaseFacade extends Facade
 {
     /**
      * Get the registered name of the component.
@@ -12,6 +12,6 @@ class DBQmsFacade extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return 'dbqms';
+        return 'qmsdb';
     }
 }
