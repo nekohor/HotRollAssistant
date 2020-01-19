@@ -575,7 +575,7 @@ Route::group(['middleware' => 'api'], function () {
 
 ## 前端适配工作
 
-### devServer
+### 调试服务器和mock的替换
 在frontend中vue.config.js修改`devServer`
 ```js
 module.exports = {
@@ -586,9 +586,18 @@ module.exports = {
 }
 ```
 
-### 相关接口文件修改
+在main.js中去除mockXHR
+```js
+// if (process.env.NODE_ENV === 'production') {
+//   const { mockXHR } = require('../mock')
+//   mockXHR()
+// }
+```
+
+如果使用线上数据，mock文件夹中的相关mock api js移除即可。
+
+### api相关修改
 在src/api中新增相关js文件, 若使用vue-element-admin集成方案，src/api中必须包含qiniu和remote-search
-在src/store中新增相关js文件
 
 src/utils中替换request.js, 其中使用Bearer的token验证方式。
 ```js
@@ -610,14 +619,83 @@ service.interceptors.request.use(
 )
 ```
 
+### store相关修改
 
-在main.js中去除mockXHR
+在src/store中新增相关js文件。
+
+#### errorLog
+
+保留errorLog.js的store文件，并在store/getters.js中新增errorLogs属性。
 ```js
-// if (process.env.NODE_ENV === 'production') {
-//   const { mockXHR } = require('../mock')
-//   mockXHR()
-// }
+const getters = {
+  sidebar: state => state.app.sidebar,
+  language: state => state.app.language,
+  size: state => state.app.size,
+  device: state => state.app.device,
+  visitedViews: state => state.tagsView.visitedViews,
+  cachedViews: state => state.tagsView.cachedViews,
+  userId: state => state.user.id,
+  token: state => state.user.token,
+  avatar: state => state.user.avatar,
+  name: state => state.user.name,
+  introduction: state => state.user.introduction,
+  roles: state => state.user.roles,
+  permissions: state => state.user.permissions,
+  permission_routes: state => state.permission.routes,
+  addRoutes: state => state.permission.addRoutes,
+  errorLogs: state => state.errorLog.logs
+}
 ```
+
+#### generateRoutes
+
+因为在store/module/permission.js中generateRoutes需要两个参数，因此需修改所有有关这个函数的调用方式。
+```js
+const actions = {
+  generateRoutes({ commit }, { roles, permissions }) {
+    return new Promise(resolve => {
+      let accessedRoutes
+      console.log(roles)
+      if (roles.includes('admin')) {
+        accessedRoutes = asyncRoutes
+      } else {
+        accessedRoutes = filterAsyncRoutes(asyncRoutes, roles, permissions)
+      }
+
+      commit('SET_ROUTES', accessedRoutes)
+      resolve(accessedRoutes)
+    })
+  }
+}
+
+```
+
+modify src/permission.js, add permission in dispatch parameter
+```js
+const accessRoutes = await store.dispatch('permission/generateRoutes', { roles, permissions })
+
+router.addRoutes(accessRoutes)
+
+next({ ...to, replace: true })
+```
+也可以通过Promise的then实现
+```js
+store.dispatch('permission/generateRoutes', { roles, permissions }).then(response => {
+  // dynamically add accessible routes
+  router.addRoutes(response);
+
+  // hack method to ensure that addRoutes is complete
+  // set the replace: true, so the navigation will not leave a history record
+  next({ ...to, replace: true });
+});
+```
+
+### store/index
+
+注意store/index中高的相关变化，如camelcase
+
+## 新增Oracle数据库的medoo
+
 
 
 
