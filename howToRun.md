@@ -596,6 +596,8 @@ module.exports = {
 
 如果使用线上数据，mock文件夹中的相关mock api js移除即可。
 
+目前怀疑实时api数据与mock数据之间的相关冲突，存在websocket连接的错误。
+
 ### api相关修改
 在src/api中新增相关js文件, 若使用vue-element-admin集成方案，src/api中必须包含qiniu和remote-search
 
@@ -692,10 +694,35 @@ store.dispatch('permission/generateRoutes', { roles, permissions }).then(respons
 
 ### store/index
 
-注意store/index中高的相关变化，如camelcase
+注意store/index中高的相关变化，如camelCase
+
+
+
+## excel编写的规则录入
+
+在env配置和config/database配置中新增db_data的数据库配置, 也可使用默认数据库。
+
+
+
 
 ## 新增Oracle数据库的medoo
 
+Install the package
+```bash
+composer require repat/laravel-medoo
+```
 
+在env配置和config/database配置中新增mes和qms的数据库配置
 
+实现自己的ServiceProvider
+Add the Service Provider to the providers array in app/config/app.php
+```php
+repat\LaravelMedoo\MedooServiceProvider::class,
+```
 
+实现自己的Facades  如：DBMES  DBQMS等
+Add alias in app/config/app.php
+```php
+'DBMES' => repat\LaravelMedoo\MedooFacade::class,
+'DBQMS' => repat\LaravelMedoo\MedooFacade::class,
+```

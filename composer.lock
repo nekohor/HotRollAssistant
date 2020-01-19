@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "11eb7fa32ac076333024b82ac4543ca4",
+    "content-hash": "d571da7a65a6876259bbc6311e092e9a",
     "packages": [
         {
             "name": "dnoegel/php-xdg-base-dir",
@@ -1793,6 +1793,75 @@
                 "uuid"
             ],
             "time": "2019-12-17T08:18:51+00:00"
+        },
+        {
+            "name": "repat/laravel-medoo",
+            "version": "1.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/repat/laravel-medoo.git",
+                "reference": "a31c4c38527412f111cea0835a629e2903958566"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/repat/laravel-medoo/zipball/a31c4c38527412f111cea0835a629e2903958566",
+                "reference": "a31c4c38527412f111cea0835a629e2903958566",
+                "shasum": "",
+                "mirrors": [
+                    {
+                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
+                        "preferred": true
+                    }
+                ]
+            },
+            "require": {
+                "ext-pdo": "*",
+                "illuminate/support": ">=5.0.0",
+                "php": ">=5.4.0"
+            },
+            "suggest": {
+                "ext-pdo_dblib": "For MSSQL or Sybase databases on Linux/UNIX platform",
+                "ext-pdo_mysql": "For MySQL or MariaDB databases",
+                "ext-pdo_oci": "For Oracle databases",
+                "ext-pdo_pqsql": "For PostgreSQL databases",
+                "ext-pdo_sqlite": "For SQLite databases",
+                "ext-pdo_sqlsrv": "For MSSQL databases on Windows platform"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "catfan\\": "src/",
+                    "repat\\LaravelMedoo\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Angel Lai",
+                    "email": "angel@catfan.me"
+                },
+                {
+                    "name": "repat",
+                    "email": "repat@repat.de"
+                }
+            ],
+            "description": "Laravel Facade and ServiceProvider for The Lightest PHP database framework to accelerate development",
+            "homepage": "http://medoo.in",
+            "keywords": [
+                "database",
+                "laravel",
+                "lightweight",
+                "lumen",
+                "mssql",
+                "mysql",
+                "php framework",
+                "sql",
+                "sqlite"
+            ],
+            "time": "2015-12-14T20:01:27+00:00"
         },
         {
             "name": "spatie/laravel-permission",

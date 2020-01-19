@@ -91,6 +91,45 @@ return [
             'prefix_indexes' => true,
         ],
 
+        'mysql_data' => [
+            'driver' => 'mysql',
+            'url' => env('DATABASE_URL'),
+            'host' => env('DB_DATA_HOST', '127.0.0.1'),
+            'port' => env('DB_DATA_PORT', '3306'),
+            'database' => env('DB_DATA_DATABASE', 'forge'),
+            'username' => env('DB_DATA_USERNAME', 'forge'),
+            'password' => env('DB_DATA_PASSWORD', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
+
+        'mes' => [
+            'driver' => env('DB_MES_CONNECTION', 'oracle'),
+            'database'=> env('DB_MES_DATABASE', 'mes'),
+            'host' => env('DB_MES_HOST', 'localhost'),
+            'username' => env('DB_MES_USERNAME', 'forge'),
+            'password' => env('DB_MES_PASSWORD', 'forge'),
+        ],
+
+        'qms' => [
+            'driver' => env('DB_QMS_CONNECTION', 'oracle'),
+            'database'=> env('DB_QMS_DATABASE', 'qms'),
+            'host' => env('DB_QMS_HOST', 'localhost'),
+            'username' => env('DB_QMS_USERNAME', 'forge'),
+            'password' => env('DB_QMS_PASSWORD', 'forge'),
+        ],
+
+
+
+
     ],
 
     /*

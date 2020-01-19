@@ -175,6 +175,10 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
+        /*
+         *  HotRoll Service Providers...
+         */
+        App\HotRoll\Providers\OracleDatabaseProvider::class,
     ],
 
     /*
@@ -225,6 +229,9 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
+
+        'DBQMS' => App\HotRoll\Facades\DBQmsFacade::class,
+        'DBMES' => App\HotRoll\Facades\DBMesFacade::class,
 
     ],
 
