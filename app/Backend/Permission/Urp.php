@@ -1,6 +1,6 @@
 <?php
 
-namespace App\HotRoll\Permission;
+namespace App\Backend\Permission;
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;

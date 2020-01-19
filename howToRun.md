@@ -187,8 +187,9 @@ class SpaController extends Controller
 
 ### 权限
 
-使用spatie/laravel-permission，安装：
+#### 安装spatie/laravel-permission
 
+使用spatie/laravel-permission，安装：
 ```bash
 composer require spatie/laravel-permission
 ```
@@ -199,16 +200,10 @@ You should publish [the migration](https://github.com/spatie/laravel-permission/
 php artisan vendor:publish --provider="Spatie\Permission\PermissionServiceProvider"
 ```
 
-Create `UsersTableSeeder` seeder and add seed data into it. When adding seed data, you can use custom helper class eg. `class URP`.
-```bash
-php artisan make:seeder UsersTableSeeder
-```
+#### 设置迁移
+发布软件的过程中已经新增了create_permission_tables迁移。
 
-And add followings into `DatabaseSeeder::run()`.
-```php
-$this->call(UsersTableSeeder::class);
-```
-
+之后修改User的相关迁移选择合适的用户登录索引。
 If you want to regard `name` as a unique index, modify the migration of `User`.
 ```php
 // $table->string('name');
@@ -217,6 +212,85 @@ $table->string('name')->unique();
 $table->string('email');
 ```
 
+迁移设置中新增3个权限迁移，修改1个user迁移：
+第一个新增迁移是`create_permission_tables`，用于新建相关的roles和permissions表，由`Spatie\Permission`在发布时自动完成新增。
+第二个新增迁移是`add_simple_role_to_users`, 用于在users中简单增加一个role字段，这里我们用role来标识user的相关权限，用role1来对权限进行分组。
+第三个新增迁移是`setup_roles_permissions`, 用于设定相关的roles和permissions参数，也可以放在数据填充中处理。
+第四个是一个user迁移的修改，修改登录时所需的属性索引，是使用email还是name任君选择。
+
+
+#### 新建数据填充
+新建seeder。Create `UsersTableSeeder` seeder and add seed data into it. When adding seed data, you can use custom helper class eg. `class URP`.
+```bash
+php artisan make:seeder UsersTableSeeder
+```
+在UsersTableSeeder中编写：
+```php
+<?php
+
+use App\Backend\Models\User;
+use App\Backend\Permission\Urp;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
+
+class UsersTableSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        $admin = User::create([
+            'name' => 'Admin',
+            'email' => 'admin@back.end',
+            'password' => Hash::make('backend'),
+        ]);
+        $manager = User::create([
+            'name' => 'Manager',
+            'email' => 'manager@back.end',
+            'password' => Hash::make('backend'),
+        ]);
+        $editor = User::create([
+            'name' => 'Editor',
+            'email' => 'editor@back.end',
+            'password' => Hash::make('backend'),
+        ]);
+        $user = User::create([
+            'name' => 'User',
+            'email' => 'editor@back.end',
+            'password' => Hash::make('backend'),
+        ]);
+        $visitor = User::create([
+            'name' => 'Visitor',
+            'email' => 'visitor@back.end',
+            'password' => Hash::make('backend'),
+        ]);
+
+        $adminRole = Role::findByName(Urp::ROLE_ADMIN);
+        $managerRole = Role::findByName(Urp::ROLE_MANAGER);
+        $editorRole = Role::findByName(Urp::ROLE_EDITOR);
+        $userRole = Role::findByName(Urp::ROLE_USER);
+        $visitorRole = Role::findByName(Urp::ROLE_VISITOR);
+        $admin->syncRoles($adminRole);
+        $manager->syncRoles($managerRole);
+        $editor->syncRoles($editorRole);
+        $user->syncRoles($userRole);
+        $visitor->syncRoles($visitorRole);
+    }
+}
+```
+And add followings into `DatabaseSeeder::run()`.
+```php
+$this->call(UsersTableSeeder::class);
+```
+
+
+#### 运行数据库迁移
+
 After the config and migration have been published and configured,  you can create the role- and permission-tables by running the  migrations.
 ```bash
 php artisan migrate
@@ -224,11 +298,23 @@ php artisan migrate
 php artisan migrate --seed
 ```
 
-> 注意：对控制器的修改可以放在数据库迁移之后进行。
+迁移过后你会发现model_has_permissions这个表示空的，因为我们没有给user这个model直接赋予权限，而是通过role的方式进行中间代理。
 
-使用`spatie/laravel-permission`
+#### 自定义控制器
 
-Create three controllers: `UserController`, `RoleController`, `PermissionController` in`App\Backend\Models`
+> 注意：对控制器的修改可以放在数据库迁移之后进行，seed文件编写需要放在迁移之前。
+
+Create three controllers: `UserController`, `RoleController`, `PermissionController` in `App\Backend\Http\Controllers`
+```bash
+php artisan make:controller UserController
+php artisan make:controller RoleController
+php artisan make:controller PermissionController
+
+# move the three controllers to `App\Backend\Controllers`
+```
+
+
+#### 自定义模型
 
 First, add the `Spatie\Permission\Traits\HasRoles` trait to your `User` model:
 
@@ -274,6 +360,8 @@ class Permission extends \Spatie\Permission\Models\Permission
 
 ```
 
+#### 自定义资源
+
 And Create three resources `UserResource`, `RoleResource`, `PermissionResource`  in `App\Backend\Http\Resources`
 ```bash
 php artisan make:resource UserResource
@@ -283,14 +371,6 @@ php artisan make:resource PermissionResource
 # move the three resources to `App\Backend\Resources`
 ```
 
-Create three controllers: `UserController`, `RoleController`, `PermissionController` in `App\Backend\Http\Controllers`
-```bash
-php artisan make:controller UserController
-php artisan make:controller RoleController
-php artisan make:controller PermissionController
-
-# move the three controllers to `App\Backend\Controllers`
-```
 
 ### JWT认证
 
@@ -347,8 +427,8 @@ php artisan jwt:secret
 
 ```
 
-User模型需要继承 `Tymon\JWTAuth\Contracts\JWTSubject` 接口，并实现接口的两个方法 `getJWTIdentifier()` 和 `getJWTCustomClaims()`，并设置`$guard_name = 'api'`
-自建User模型于`App\Backend\Models`。
+User模型需要继承 `Tymon\JWTAuth\Contracts\JWTSubject` 接口，并实现接口的两个方法 `getJWTIdentifier()` 和 `getJWTCustomClaims()`
+自建User模型于`App\Backend\Models`, 因为没有使用默认的User 所以需要添加`$guard_name = 'api'`
 ```php
 <?php
 
