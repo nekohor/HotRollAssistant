@@ -106,7 +106,7 @@ export default {
     return {
       loginForm: {
         username: 'Admin',
-        password: '22501580'
+        password: '11235813'
       },
       loginRules: {
         // username: [{ required: true, trigger: 'blur', validator: validateUsername }],
@@ -168,6 +168,7 @@ export default {
           this.$store.dispatch('user/login', this.loginForm)
             .then(() => {
               this.$router.push({ path: this.redirect || '/', query: this.otherQuery })
+              console.log('aaaa')
               this.loading = false
             })
             .catch(() => {
