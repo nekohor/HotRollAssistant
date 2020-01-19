@@ -31,7 +31,7 @@ class UserResource extends JsonResource
                 $this->getAllPermissions()->toArray()
             ),
             // 'avatar' => 'https://i.pravatar.cc',
-            'avatar' => 'http://localhost/avatar/totoro1.gif',
+            'avatar' => 'http://localhost/avatar/totoro2.gif',
         ];
     }
 }
