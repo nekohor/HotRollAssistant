@@ -25,18 +25,34 @@ Route::group(['middleware' => 'api'], function () {
     });
 });
 
-
+// rules import
 Route::get(
     'rules/import', 
     '\App\HotRoll\Http\Controllers\RulesImportController@importRules'
 );
 
+
+// output related
 Route::post(
     'outputs/shift', 
-    '\App\HotRoll\Http\Controllers\ProductionOutputController@calculateShiftOutput'
+    '\App\HotRoll\Http\Controllers\OutputController@calculateShiftOutput'
 );
 
 Route::get(
     'outputs/shift', 
-    '\App\HotRoll\Http\Controllers\ProductionOutputController@calculateShiftOutput'
+    '\App\HotRoll\Http\Controllers\OutputController@calculateShiftOutput'
+);
+
+
+// rhythm related
+Route::get(
+    'rhythms/discharge', 
+    '\App\HotRoll\Http\Controllers\RhythmController@getDischargeRhythms'
+);
+
+
+// test oracle database
+Route::get(
+    'mes/results', 
+    '\App\HotRoll\Http\Controllers\QueryDataController@getMesReuslt'
 );

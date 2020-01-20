@@ -2,8 +2,8 @@
 
 namespace App\HotRoll\Logics\Production;
 
-use App\HotRoll\Models\RuleHourlyOutput;
-use App\HotRoll\Models\RuleSteelGradeCatego;
+use App\HotRoll\Dao\SteelGradeCategoDao;
+use App\HotRoll\Dao\HourlyOutputDao;
 
 class ShiftOutputLogic
 {
@@ -120,29 +120,23 @@ class ShiftOutputLogic
 
     }
 
-    public function getSteelGradeCatego($steelGrade)
-    {
-        return RuleSteelGradeCatego::where("steel_grade", $steelGrade)->get()[0]["catego2"];
-    }
     public function getPiecesAnHour($record)
     {
         $steelGrade = $record['steelGrade'];
         $thk = $record['thk'];
         $wid = $record['wid'];
-        $catego = $this->getSteelGradeCatego($steelGrade);
 
-        $query = RuleHourlyOutput::where("line", $this->line)
-            ->where("steel_grade_catego", $catego)
-            ->where("thk_gte", "<=", $thk)
-            ->where("thk_lt", ">", $thk)
-            ->where("wid_gte", "<=", $wid)
-            ->where("wid_lt", ">", $wid)
-            ->get();
+        $categoDao = new SteelGradeCategoDao();
+        $catego = $categoDao->getCategoBySteelGrade($steelGrade);
 
-        if (count($query) === 0) {
+        $hourlyOutputDao = new HourlyOutputDao();
+        $data = $hourlyOutputDao->getHourlyOutput(
+            $this->line, $catego, $thk, $wid);
+
+        if (count($data) === 0) {
             $pieces = 28;
         } else {
-            $pieces = $query[0]["pieces_an_hour"];
+            $pieces = $data[0]["pieces_an_hour"];
         }
         return $pieces;
     }

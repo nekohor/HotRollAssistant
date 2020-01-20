@@ -13,6 +13,7 @@
         "laravel/framework": "^6.2",
         "laravel/tinker": "^2.0",
         "maatwebsite/excel": "^3.1",
+        "nesbot/carbon": "^2.28",
         "repat/laravel-medoo": "^1.0",
         "spatie/laravel-permission": "^3.5",
         "tymon/jwt-auth": "~1.0"
