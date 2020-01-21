@@ -1,5 +1,5 @@
 module.exports = {
-  title: 'Vue Element Admin',
+  title: '热轧工艺助手',
 
   /**
    * @type {boolean} true | false

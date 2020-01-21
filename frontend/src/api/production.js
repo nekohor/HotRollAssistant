@@ -8,3 +8,11 @@ export function calcShiftOutput(data) {
   })
 }
 
+export function getDischargeRhythm(data) {
+  return request({
+    url: '/rhythms/discharge',
+    method: 'get',
+    params: data
+  })
+}
+

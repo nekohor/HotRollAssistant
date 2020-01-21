@@ -7,6 +7,7 @@ use App\HotRoll\Dao\MesResultDao;
 use App\HotRoll\Dao\SteelGradeCategoDao;
 use App\HotRoll\Dao\HourlyOutputDao;
 
+
 use Carbon\Carbon;
 
 class RhythmLogic
@@ -17,15 +18,14 @@ class RhythmLogic
     private $categoDao;
     private $hourlyOutputDao;
 
-    public function __construct($line)
+    public function __construct()
     {
-        $this->line = $line;
         $this->mesResultDao = new MesResultDao();
         $this->categoDao = new SteelGradeCategoDao();
         $this->hourlyOutputDao = new HourlyOutputDao();
     }
 
-    public function getAimDischargeRhythm($record)
+    public function getAimDischargeRhythm($line, $record)
     {
         $steelGrade = $record['steelGrade'];
         $catego = $this->categoDao->getCategoBySteelGrade($steelGrade);
@@ -34,7 +34,7 @@ class RhythmLogic
         $wid = $record['wid'];
 
         $data = $this->hourlyOutputDao->getHourlyOutput(
-            $this->line, $catego, $thk, $wid);
+            $line, $catego, $thk, $wid);
 
         if (count($data) === 0) {
             $pieces = 28;
@@ -52,7 +52,7 @@ class RhythmLogic
     public function getActDischargeRhythm($record, $key, $data)
     {
         if ($key <= 0) {
-            return 0;
+            return 120;
         } else {
 
             $curRecord =  $data[$key];
@@ -66,9 +66,9 @@ class RhythmLogic
         }
     }
 
-    public function getDischargeRhythms($startTime, $endTime)
+    public function getDischargeRhythms($line, $startTime, $endTime)
     {
-        $data = $this->mesResultDao->getTestDataByLineAndTime($this->line, $startTime, $endTime);
+        $data = $this->mesResultDao->getDataByLineAndTime($line, $startTime, $endTime);
         
         $rhythms = [];
         foreach ($data as $key => $record) {
@@ -76,11 +76,10 @@ class RhythmLogic
             $rhythm = [];
             $rhythm["coilId"] = $record['coilId'];
             $rhythm["dischargeTime"] = $record['dischargeTime'];
-            $rhythm["aimRhythm"] = $this->getAimDischargeRhythm($record);
-            $rhythm["actRhythm"] = $this->getActDischargeRhythm($record, $key, $data);
+            $rhythm["aimDischargeRhythm"] = round($this->getAimDischargeRhythm($line, $record), 2);
+            $rhythm["actDischargeRhythm"] = $this->getActDischargeRhythm($record, $key, $data);
 
-            $rhythms []= $rhythm;
-
+            $rhythms[]= $rhythm;
         }
 
         return $rhythms;

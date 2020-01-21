@@ -114,6 +114,15 @@ class MesResultDao
         return $this->postProcess($data);
     }
 
+    public function getTestDataByTime($startTime, $endTime)
+    {
+        $data = TestMesResult::where([
+            ['PRODSTART', '>=', $startTime],
+            ['PRODEND', '<=', $endTime],
+        ])->get();
+        return $this->postProcess($data);
+    }
+
     public function getDataByLineAndTime($line, $startTime, $endTime)
     {
 

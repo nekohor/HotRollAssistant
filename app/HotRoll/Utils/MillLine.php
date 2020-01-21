@@ -4,6 +4,11 @@ namespace App\HotRoll\Utils;
 
 class MillLine
 {
+    public static function getMillLines()
+    {
+        return ['2250', '1580'];
+    }
+    
     public static function getCoilIdHeader($line)
     {
         $header = '';
@@ -39,5 +44,13 @@ class MillLine
         }
 
         return $line;
+    }
+
+    public static function filterData($data, $key, $aimLine){
+        $cond = function( $element ) use ($key, $aimLine) {
+            $curLine = static::getLineByCoilId($element[ $key]);
+            return $curLine === $aimLine;
+        };
+        return array_filter($data, $cond);
     }
 }
